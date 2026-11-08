@@ -17,16 +17,12 @@ from services.extractor.pipeline import Extractor
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="bob-extract", description="BOB public IG extractor (L0→L3)")
     ap.add_argument("url", help="Public Instagram post/reel URL")
-    ap.add_argument("--no-cache", action="store_true", help="Bypass shortcode cache")
     ap.add_argument("--preview", action="store_true", help="Also show L0 oEmbed preview")
-    ap.add_argument("--db", default="bob_cache.sqlite3", help="Cache DB path")
     args = ap.parse_args(argv)
 
-    from services.extractor.cache import ShortcodeCache
-
-    ex = Extractor(cache=ShortcodeCache(args.db))
+    ex = Extractor()
     try:
-        result = ex.extract(args.url, use_cache=not args.no_cache)
+        result = ex.extract(args.url)
     except BOBError as e:
         print(json.dumps({"ok": False, "error": {"code": e.code, "message": str(e), "retry_after": e.retry_after}}), file=sys.stderr)
         print(f"Invalid or unsupported URL")  # keep stderr honest; JSON above is machine-readable

@@ -10,7 +10,6 @@ import sys
 import time
 
 from services.extractor import BOBError
-from services.extractor.cache import ShortcodeCache
 from services.extractor.pipeline import Extractor
 
 # Pinned by status, not by permanence — replace when a reel disappears.
@@ -19,12 +18,12 @@ PINNED = [
 ]
 
 
-def probe(urls: list[str], cache_db: str = "bob_cache.sqlite3") -> dict:
-    ex = Extractor(cache=ShortcodeCache(cache_db))
+def probe(urls: list[str]) -> dict:
+    ex = Extractor()
     report = {"ts": int(time.time()), "results": []}
     for u in urls:
         try:
-            r = ex.extract(u, use_cache=False)
+            r = ex.extract(u)
             report["results"].append({"url": u, "ok": True, "layer": r.get("layer"), "shortcode": r.get("shortcode")})
         except BOBError as e:
             report["results"].append({"url": u, "ok": False, "code": e.code, "error": str(e)[:200]})

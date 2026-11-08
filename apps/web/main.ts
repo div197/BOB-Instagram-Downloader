@@ -1,5 +1,5 @@
-// BOB Pages static main — extension bridge (no backend, no Workers).
-// Pages JS listens for BOB extension on this origin; extraction runs in the extension SW.
+// BOB Pages + Worker main — NO extension, NO cache. Paste → POST? GET /api/extract (Worker) → preview → download.
+// Public posts only. No cookies, no login. 429 → Retry-After honored.
 
 const status = (t: string) => { const el = document.getElementById("status"); if (el) el.textContent = t; };
 
@@ -15,9 +15,8 @@ const status = (t: string) => { const el = document.getElementById("status"); if
   }
 }
 
-// Download helper (mobile-first): try Web Share API files first, fallback <a download>.
+// Download helper (mobile-first): Web Share API files first, fallback <a download>.
 export async function shareOrDownload(cdnUrl: string, filename: string) {
-  // Fetch bytes (CDN is CORS-open for <a>, but fetch needs CORS — use blob via <a> when share fails)
   try {
     if ("canShare" in navigator && navigator.canShare({ files: [new File([], "x")] })) {
       const resp = await fetch(cdnUrl);
@@ -28,7 +27,7 @@ export async function shareOrDownload(cdnUrl: string, filename: string) {
         return "shared";
       }
     }
-  } catch { /* fallback to anchor below */ }
+  } catch { /* fallback below */ }
   const a = document.createElement("a");
   a.href = cdnUrl;
   a.download = filename;
@@ -37,36 +36,36 @@ export async function shareOrDownload(cdnUrl: string, filename: string) {
   a.remove();
   return "anchored";
 }
-let connected = false;
-window.addEventListener("message", (e) => {
-  if (e.data?.source === "bob-ext" && e.data?.type === "pong") {
-    connected = true;
-    status("BOB extension connected — paste a public Instagram link to download in HD.");
-  }
-  if (e.data?.source === "bob-ext" && e.data?.type === "media") {
-    const v = (e.data.media?.media || [])[0];
-    const box = document.getElementById("preview");
-    if (box && (v?.video_url || v?.thumbnail)) {
-      const src = v.video_url || v.thumbnail;
-      box.innerHTML = v.is_video
-        ? `<video controls preload="metadata" src="${src}"></video><p class="note">Ready — right-click → Save video, or use the Download button above in the extension.</p>`
-        : `<img alt="Instagram media" src="${src}" style="width:100%;border-radius:12px">`;
-    }
-  }
-});
-window.postMessage({ source: "bob-web", type: "ping" }, "*");
 
-// 2) Paste → postMessage to extension (if present). No extension → install funnel (honest).
-document.getElementById("go")?.addEventListener("click", () => {
+document.getElementById("go")?.addEventListener("click", async () => {
   const url = (document.getElementById("url") as HTMLInputElement)?.value?.trim() || "";
   if (!/instagram\.com\/(p|reel|reels|tv)\//.test(url)) {
     status("That doesn't look like a public Instagram post/reel link.");
     return;
   }
-  if (connected) {
-    window.postMessage({ source: "bob-web", type: "extract", url }, "*");
-    status("Fetching from your browser (your IP)…");
-  } else {
-    status("Install the BOB extension for one-click HD downloads (uses your own browser). Or open the reel in Instagram → long-press → Save.");
+  status("Fetching…");
+  try {
+    const res = await fetch("/api/extract?url=" + encodeURIComponent(url));
+    const data = (await res.json()) as any;
+    if (!res.ok || !data.ok) {
+      status("Can't fetch this one right now (" + (data.error || res.status) + "). Try again shortly.");
+      return;
+    }
+    const item = (data.media.media || [])[0] as any;
+    const src = item?.video_url || item?.thumbnail || "";
+    const box = document.getElementById("preview");
+    if (box && src) {
+      box.innerHTML = item?.is_video
+        ? `<video controls preload="metadata" src="${src}"></video><p class="note">Ready — tap Download, or long-press → Save.</p>`
+        : `<img alt="Instagram media" src="${src}" style="width:100%;border-radius:12px">`;
+      const dl = document.createElement("button");
+      dl.textContent = "⤓ Download HD";
+      dl.style.cssText = "margin-top:10px;width:100%;padding:12px;border-radius:10px;border:0;background:#fff;color:#000;font-weight:700";
+      dl.onclick = () => shareOrDownload(src, "bob-" + (data.media.shortcode || "reel") + ".mp4");
+      box.appendChild(dl);
+    }
+    status("Done — " + (data.media.owner ? "@" + data.media.owner + " · " : "") + (data.media.duration ? data.media.duration.toFixed(1) + "s" : ""));
+  } catch (e: any) {
+    status("Network error: " + (e?.message || "retry shortly."));
   }
 });

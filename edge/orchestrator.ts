@@ -1,9 +1,12 @@
-// BOB Edge Worker (Cloudflare Workers / Pages Functions) — cache-first orchestration.
-// Shakti edge: KV cache hit → 302 CDN; miss → Shiva /extract (single source of fetch).
-// Deploy: wrangler deploy (no Pages Functions needed if shipped as standalone Worker).
-// Bindings: KV `BOB_CACHE` (shortcode → BOBMedia JSON, 6h TTL). Secret: SHIVA_URL.
+// BOB Edge Worker (Cloudflare Workers) — pure edge, NO cache, NO Shiva fallback.
+// Owner constraint: no cache feature, no extension, Cloudflare-only.
+// This worker FETCHES instagram.com/p/{shortcode}/ itself (Worker native fetch),
+// parses data-sjs via @bob/extractor (packages/extractor), returns BOBMedia JSON.
+// Cache is intentionally absent — every request pays one IG fetch (owner's choice;
+// honest cost: ~200 req/hr/IP budget means high traffic will 429 — see docs/CLOUDFLARE-PURE.md §5).
+// Public posts only. No cookies, no login, no private bypass. 429 → Retry-After honored.
 
-const SHIVA = "https://shiva.bob.example.com"; // env: SHIVA_URL
+import { extractXigPolarisMedia, parseMedia } from "../packages/extractor/src/index.ts";
 
 const SHORT_RE = /instagram\.com\/(?:[A-Za-z0-9_.]+\/)?(p|reel|reels|tv)\/([A-Za-z0-9_\-]{8,})/;
 
@@ -13,7 +16,7 @@ function shortcodeFrom(url: string): string | null {
 }
 
 export default {
-  async fetch(req: Request, env: { BOB_CACHE?: KVNamespace; SHIVA_URL?: string }): Promise<Response> {
+  async fetch(req: Request): Promise<Response> {
     const url = new URL(req.url);
     if (url.pathname !== "/api/extract") return new Response("Not found", { status: 404 });
     const raw = url.searchParams.get("url") || "";
@@ -21,30 +24,28 @@ export default {
     if (!shortcode) return Response.json({ ok: false, error: "INVALID_URL" }, { status: 400 });
     if (shortcode.length > 28) return Response.json({ ok: false, error: "PRIVATE" }, { status: 403 });
 
-    // 1) Edge cache — zero IG fetch on hit (the whole game)
-    if (env.BOB_CACHE) {
-      const hit = await env.BOB_CACHE.get(shortcode);
-      if (hit) {
-        return new Response(hit, { headers: { "Content-Type": "application/json", "X-Cache": "HIT" } });
-      }
-    }
-
-    // 2) Shiva fallback — one fetch, respectful backoff honored
-    const shiva = env.SHIVA_URL || SHIVA;
-    const upstream = await fetch(shiva + "/extract?url=" + encodeURIComponent("https://www.instagram.com/reel/" + shortcode + "/"), {
-      headers: { "User-Agent": "BOB-Shakti/1.0" },
-    });
-    const body = await upstream.text();
-    if (upstream.ok && env.BOB_CACHE) {
-      await env.BOB_CACHE.put(shortcode, body, { expirationTtl: 21600 });
-      return new Response(body, { status: upstream.status, headers: { "Content-Type": "application/json", "X-Cache": "MISS" } });
-    }
-    return new Response(body, {
-      status: upstream.status,
+    // Edge fetch — Worker native fetch (browser headers only; no TLS impersonation available at edge).
+    const igUrl = "https://www.instagram.com/p/" + shortcode + "/";
+    const upstream = await fetch(igUrl, {
       headers: {
-        "Content-Type": "application/json",
-        ...(upstream.headers.get("retry-after") ? { "Retry-After": upstream.headers.get("retry-after")! } : {}),
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.instagram.com/",
       },
     });
+    if (upstream.status === 429) {
+      return Response.json({ ok: false, error: "SOURCE_RATE_LIMITED" }, { status: 429, headers: { "Retry-After": upstream.headers.get("retry-after") || "60" } });
+    }
+    if (upstream.status === 401 || upstream.status === 403 || upstream.status === 404) {
+      return Response.json({ ok: false, error: "PRIVATE" }, { status: 403 });
+    }
+    const html = await upstream.text();
+    const rawMedia = extractXigPolarisMedia(html);
+    if (!rawMedia) {
+      return Response.json({ ok: false, error: "EXTRACTION_FAILED: xig_polaris_media not found (gated or drift)" }, { status: 502 });
+    }
+    const media = parseMedia(rawMedia as any);
+    return Response.json({ ok: true, media }, { headers: { "Content-Type": "application/json" } });
   },
 };

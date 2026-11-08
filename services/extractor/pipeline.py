@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import os
 
-from .cache import ShortcodeCache
 from .errors import ExtractionFailedError, PrivateError, RateLimitedError
 from .fetcher import Fetcher
 from .l1 import extract_xig_polaris_media, parse_media
@@ -23,9 +22,8 @@ class MediaResult(dict):
 
 
 class Extractor:
-    def __init__(self, fetcher: Fetcher | None = None, cache: ShortcodeCache | None = None):
+    def __init__(self, fetcher: Fetcher | None = None):
         self.fetcher = fetcher or Fetcher()
-        self.cache = cache if cache is not None else ShortcodeCache()
 
     # -- L0 preview (best-effort, never raises) --------------------------
     def l0_preview(self, shortcode: str) -> dict | None:
@@ -67,13 +65,8 @@ class Extractor:
         return parse_media(media)
 
     # -- main entry -------------------------------------------------------
-    def extract(self, raw_url: str, use_cache: bool = True) -> MediaResult:
+    def extract(self, raw_url: str) -> MediaResult:
         shortcode = extract_shortcode(raw_url)
-
-        if use_cache:
-            hit = self.cache.get(shortcode)
-            if hit:
-                return MediaResult(hit)
 
         errors: list[str] = []
         for layer_name, fn in (
@@ -90,14 +83,12 @@ class Extractor:
                 continue
             if result:
                 result["shortcode"] = shortcode
-                self.cache.put(shortcode, result)
-                return MediaResult({**result, "_cached": False})
+                return MediaResult(result)
 
         # L4 managed fallback (opt-in, budget-gated)
         managed = self._l4_managed(shortcode)
         if managed:
-            self.cache.put(shortcode, managed)
-            return MediaResult({**managed, "_cached": False})
+            return MediaResult(managed)
 
         raise ExtractionFailedError(
             "All layers failed. " + " | ".join(errors) + " (try again; if public in incognito, an upstream change may be in flight)."
