@@ -76,13 +76,27 @@ export async function shareOrDownload(cdnUrl: string, filename: string) {
   return "anchored";
 }
 
-// Clone pattern: ONE box, ONE button. Paste → IG opens → tap BOB there (1 tap = download).
-document.getElementById("go")?.addEventListener("click", () => {
+// Clone pattern: ONE box, ONE button. Paste → edge /api/extract (stateless) → preview + download.
+document.getElementById("go")?.addEventListener("click", async () => {
   const url = (document.getElementById("url") as HTMLInputElement)?.value?.trim() || "";
   if (!/instagram\.com\/(p|reel|reels|tv)\//.test(url)) {
     status("That doesn't look like a public Instagram post/reel link.");
     return;
   }
-  status("Tap ⤓ BOB on the Instagram tab (1 tap) — HD download starts there.");
-  window.open(url, "_blank");
+  status("Fetching…");
+  try {
+    const res = await fetch("/api/extract?url=" + encodeURIComponent(url));
+    const data = (await res.json()) as any;
+    if (!res.ok || !data.ok) {
+      if (res.status === 429) { status("Instagram is rate-limiting us. Try again in 60 seconds."); return; }
+      if (data?.error === "PRIVATE") { status("This post is private, or accounts without login can't view it."); return; }
+      status("Can't fetch this one right now (" + (data.error || res.status) + "). Try again shortly.");
+      return;
+    }
+    const m = data.media || {};
+    renderPreview({ shortcode: m.shortcode, video_url: m.video_url || "", thumb: m.thumbnail || "", owner: m.owner, duration: m.duration });
+    status("Done — " + (m.owner ? "@" + m.owner + " · " : "") + (m.duration ? m.duration.toFixed(1) + "s" : m.width ? m.width + "×" + m.height : ""));
+  } catch (e: any) {
+    status("Network error: " + (e?.message || "retry shortly."));
+  }
 });
