@@ -1,5 +1,6 @@
-// BOB Pages static main — NO Workers, NO cache, NO extension, NO .html-upload.
-// Primary: Bookmarklet (user IP, IG origin). BOB itself never fetches Instagram.
+// BOB Pages static main — NO cache, NO extension, NO .html-upload.
+// Primary: Edge /api/extract (stateless, clone pattern) · Fallback: Bookmarklet (user IP, IG origin).
+// Cloudflare Workers datacenter IP may gate (429/502) — bookmarklet lane bypasses via user's hair.
 // Public posts only. No cookies sent anywhere.
 
 const status = (t: string) => { const el = document.getElementById("status"); if (el) el.textContent = t; };
@@ -84,9 +85,12 @@ document.getElementById("go")?.addEventListener("click", async () => {
     const res = await fetch("/api/extract?url=" + encodeURIComponent(url));
     const data = (await res.json()) as any;
     if (!res.ok || !data.ok) {
-      if (res.status === 429) { status("Instagram is rate-limiting us. Try again in 60 seconds."); return; }
+      if (res.status === 429) { status("Instagram is rate-limiting our datacenter IP. Try the ⤓ BOB bookmark on the post (your browser — no limit), or retry in 60s."); return; }
       if (data?.error === "PRIVATE") { status("This post is private, or accounts without login can't view it."); return; }
-      status("Can't fetch this one right now (" + (data.error || res.status) + "). Try again shortly.");
+      // Gated/drift = datacenter ASN ne script strip ki (local Mac/curl_cffi par same reel 821KB pass karta hai).
+      // Fallback: user-IP bookmarklet lane — user ke tab me data already loaded hai.
+      status("Edge gate: Instagram ne data chhupaya (" + (data.error || res.status) + "). Use your own browser → open the post · tap ⤓ BOB. " + url);
+      window.open(url, "_blank");
       return;
     }
     const m = data.media || {};
