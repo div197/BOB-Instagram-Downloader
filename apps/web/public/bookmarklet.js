@@ -49,13 +49,19 @@
     var url = post.video_url || bestV(post.video_versions) || bestI(post.image_versions2 && post.image_versions2.candidates) || post.display_uri || post.display_url || (raw.__dom ? raw.video_url : "");
     if (!url) { alert("BOB: no media URL found (photo has no video — trying image)."); }
     var name = "bob-" + (post.code || "instagram") + ((post.media_type === 2 || url.indexOf(".mp4") !== -1) ? ".mp4" : ".jpg");
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.rel = "noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    function saveBlob(u) {
+      fetch(u, { mode: "cors" }).then(function (r) { return r.blob(); }).then(function (b) {
+        var tmp = document.createElement("a");
+        tmp.href = URL.createObjectURL(b);
+        tmp.download = name;
+        tmp.rel = "noreferrer";
+        document.body.appendChild(tmp);
+        tmp.click();
+        tmp.remove();
+        setTimeout(function () { URL.revokeObjectURL(tmp.href); }, 5000);
+      }).catch(function () { window.open(u, "_blank", "noopener"); });
+    }
+    saveBlob(url);
     // Handoff (optional): open BOB gallery with media summary in hash
     try {
       var summary = { shortcode: post.code || "", video_url: url, thumb: post.display_uri || post.display_url || "" };
