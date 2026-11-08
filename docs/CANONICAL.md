@@ -20,8 +20,7 @@ Instagram ka `data-sjs` blob har Relay deploy par modules shuffle kar sakta hai.
 ```text
 1. Strict walk     → fast path (current layout)          — 12/13 tests lock
 2. Deep walk       → recursive signature search           — shuffle-proof (fallback test: wrapped payload)
-3. CI drift gate   → test fixture shuffle                               — push par red = patch before deploy
-                   + health probe (L1 null-rate)          — hourly cron (GitHub Actions)
+3. CI drift gate   → local fixture test (13/13)           — red = patch before push
 ```
 
 **No `doc_id`, no login, no cookies** — logged-out `data-sjs` is the survivor path (ScrapFly 2026: `web_profile_info` now 400-gated; `data-sjs` is not). If IG ever gates `data-sjs` itself, the honest answer is an error message, not circumvention.
