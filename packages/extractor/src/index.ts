@@ -1,7 +1,7 @@
 /**
  * @bob/extractor — signature parser (TS port of Python L1, dual-schema).
  * Matches by object shape (image_versions2 + code), never by brittle path.
- * Runs in extension SW / web / Node (zero deps).
+ * Runs in Worker / web / Node (zero deps).
  */
 
 export interface VideoVersion { type?: number; url: string; width?: number; height?: number }
