@@ -43,3 +43,7 @@ git push -u origin main
 - Lossless delivery (progressive 720p + DASH ladder; no re-encode).
 - No cache stored, no video bytes hosted by BOB — CDN links pass through.
 - Freemium-first if monetized (AdSense is high-risk for downloaders — Publisher Policies).
+
+## Live URL
+- GitHub: https://github.com/div197/BOB-Instagram-Downloader
+- Cloudflare Pages: (dashboard me connect karke `apps/web` build karo — Build: `cd apps/web && vite build`, Output: `apps/web/dist`)
