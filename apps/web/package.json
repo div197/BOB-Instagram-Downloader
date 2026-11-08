@@ -1,0 +1,11 @@
+{
+  "name": "@bob/web",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5173",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "engines": { "node": ">=20" }
+}

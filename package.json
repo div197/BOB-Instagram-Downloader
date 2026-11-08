@@ -1,0 +1,19 @@
+{
+  "name": "bob-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BOB = Break Ordinary Boundaries — Pages static + MV3 extension (requester-IP), no Workers",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "extractor:build": "pnpm --filter @bob/extractor build"
+  },
+  "devDependencies": {
+    "typescript": "5.6",
+    "vite": "^8.3.6"
+  }
+}

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BOB — Instagram Reel Downloader (Public, No Login)</title>
+<meta name="description" content="BOB downloads public Instagram reels and posts in HD. No login. No tracking. Gentleman UX — one tool, one button, no ads above the fold.">
+<meta property="og:title" content="BOB — Instagram Downloader">
+<meta property="og:description" content="Public reels & posts in HD. No login. No tracking.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⤓</text></svg>">
+<style>
+  :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#0b0d12;color:#e8ecf3;padding:32px 16px}
+  main{max-width:720px;margin:0 auto}h1{font-size:40px;line-height:1.05;margin:0 0 8px}
+  .sub{color:#9fb0c3;margin:0 0 24px} .tool{background:#121623;border:1px solid #232a3d;border-radius:16px;padding:20px}
+  input{width:100%;padding:14px;border-radius:12px;border:1px solid #2a3350;background:#0b0d12;color:#fff}
+  button{margin-top:12px;width:100%;padding:14px;border:0;border-radius:12px;background:#fff;color:#000;font-weight:700;cursor:pointer}
+  .note{font-size:13px;color:#9fb0c3;margin-top:12px} .preview{margin-top:16px}
+  video{width:100%;border-radius:12px;background:#000}
+  .ads{margin-top:24px;min-height:100px;border:1px dashed #232a3d;border-radius:12px;display:grid;place-items:center;color:#5b6a85;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+  <h1>BOB — Instagram Downloader</h1>
+  <p class="sub">Public reels &amp; posts in HD. No login. No tracking. One tool, one button — no ads above the fold.</p>
+  <div class="tool">
+    <input id="url" placeholder="Paste a public Instagram reel / post link…" inputmode="url" autocomplete="off">
+    <button id="go">Get HD download</button>
+    <div id="status" class="note">Install the BOB browser extension for one-click downloads — it uses your own browser IP, so we never burn ours.</div>
+    <div id="preview" class="preview"></div>
+  </div>
+  <div class="ads">Advertisement (below the tool only — never above, never disguised as a download button)</div>
+  <div class="note">Public only · We never ask for your Instagram login · Files stream directly from Instagram CDN, nothing stored · Copyright remains with creators.</div>
+</main>
+<script type="module" src="/main.ts"></script>
+</body>
+</html>

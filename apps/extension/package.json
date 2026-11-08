@@ -1,0 +1,9 @@
+{
+  "name": "@bob/extension",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "mkdir -p dist && cp manifest.json dist/ && node build.mjs"
+  },
+  "engines": { "node": ">=20" }
+}
