@@ -5,6 +5,8 @@
 A deep, ultra-scalable, edge-first system to download **public** Instagram posts, reels, IGTV, and carousels — with a modern hybrid architecture (Cloudflare Pages + Workers + Go extractor) and freemium-first monetization.
 
 > Ultra-deep research (extraction, edge/scale architecture, competitors, AdSense policy, SEO, business model) lives in **[docs/DEEP-RESEARCH.md](docs/DEEP-RESEARCH.md)**. Read §1 Executive Verdict before writing any code.
+>
+> The extractor kernel — upside-down tree, roots first (Gita 15.1) — is specified in **[docs/EXTRACTOR-METHODOLOGY.md](docs/EXTRACTOR-METHODOLOGY.md)**: L0 oEmbed preview → L1 inline JSON → L2 GraphQL → L3 yt-dlp/Reelkeep engine → L4 managed fallback → L5 browser last-resort, code-reviewed against the latest GitHub repos (Nov 2026).
 
 ## Principles
 
