@@ -12,32 +12,66 @@
 <meta property="og:description" content="Public reels & posts in HD. No login. No tracking.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⤓</text></svg>">
 <style>
-  :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#0b0d12;color:#e8ecf3;padding:32px 16px}
-  main{max-width:720px;margin:0 auto}h1{font-size:40px;line-height:1.05;margin:0 0 8px}
-  .sub{color:#9fb0c3;margin:0 0 24px} .tool{background:#121623;border:1px solid #232a3d;border-radius:16px;padding:20px}
+  :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#0b0d12;color:#e8ecf3}
+  body{padding:0 16px 32px}
+  .nav{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid #1b2135}
+  .nav b{font-size:20px}.nav span{color:#9fb0c3;font-size:13px;margin-left:auto}
+  main{max-width:720px;margin:0 auto;text-align:center;padding-top:36px}
+  h1{font-size:44px;line-height:1.05;margin:0 0 12px}
+  .sub{color:#9fb0c3;margin:0 auto 28px;max-width:520px;font-size:16px}
+  .tool{background:#121623;border:1px solid #232a3d;border-radius:16px;padding:20px;text-align:left}
+  .tool h2{margin:0 0 14px;font-size:18px;text-align:center}
   input{width:100%;padding:14px;border-radius:12px;border:1px solid #2a3350;background:#0b0d12;color:#fff}
-  button{margin-top:12px;width:100%;padding:14px;border:0;border-radius:12px;background:#fff;color:#000;font-weight:700;cursor:pointer}
-  .note{font-size:13px;color:#9fb0c3;margin-top:12px} .preview{margin-top:16px}
+  button{margin-top:12px;width:100%;padding:14px;border:0;border-radius:12px;background:#fff;color:#000;font-weight:800;cursor:pointer;font-size:16px}
+  .step{display:flex;gap:12px;text-align:left;margin:10px 0}
+  .step b{background:#232a3d;border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:grid;place-items:center;font-size:14px}
+  .step p{margin:0;color:#cbd5e1;font-size:15px}
+  details{margin-top:16px;padding:12px 14px;border:1px dashed #2a3350;border-radius:12px;text-align:left;font-size:14px;color:#9fb0c3}
+  summary{cursor:pointer;font-weight:600;color:#cbd5e1}
+  .preview{margin-top:16px;text-align:center}
   video{width:100%;border-radius:12px;background:#000}
-  .ads{margin-top:24px;min-height:100px;border:1px dashed #232a3d;border-radius:12px;display:grid;place-items:center;color:#5b6a85;font-size:13px}
+  .status{text-align:center}
+  .note{font-size:13px;color:#9fb0c3;margin-top:10px}
+  .grid{max-width:960px;margin:28px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .card{background:#121623;border:1px solid #232a3d;border-radius:14px;padding:16px;text-align:left}
+  .card b{display:block;margin-bottom:6px}
+  .card p{margin:0;color:#9fb0c3;font-size:14px}
+  footer{max-width:720px;margin:28px auto 0;text-align:center;color:#5b6a85;font-size:13px}
+  a.bkm{display:inline-block;padding:10px 18px;border-radius:999px;background:#fff;color:#000;font-weight:800;text-decoration:none}
 </style>
 </head>
 <body>
+<header class="nav"><b>⤓ BOB</b><span>Public · No login · No tracking</span></header>
 <main>
-  <h1>BOB — Instagram Downloader</h1>
-  <p class="sub">Public reels &amp; posts in HD. No login. No tracking. One tool, one button — no ads above the fold.</p>
-  <div class="tool"><p style="margin:0 0 8px;font-weight:600">1) Drag this to your bookmarks bar:</p>
-    <p style="margin:0 0 8px"><a id="bkm" href="javascript:void(0)" style="display:inline-block;padding:10px 14px;border-radius:999px;background:#fff;color:#000;font-weight:700;text-decoration:none">⤓ BOB Downloader</a></p>
-    <p class="note" style="margin:0 0 12px">Then open any public Instagram reel/post → tap the bookmark → HD download starts (your browser, your IP — BOB makes zero requests).</p><p style="margin:0 0 8px;font-weight:600">2) Or save the page &amp; upload it (no install, works on mobile):</p>
-    <input id="file" type="file" accept=".html,.htm">
-    <p style="margin:14px 0 8px;font-weight:600">3) Paste a link (opens it for you — BOB does not fetch Instagram):</p>
-    <input id="url" placeholder="https://www.instagram.com/reel/…" inputmode="url" enterkeyhint="go" autocomplete="off">
-    <button id="go" style="min-height:52px;font-size:17px">Open post → then tap BOB</button>
-    <div id="status" class="note">Drag the BOB bookmarklet above, or upload a saved Instagram page — your browser does the work, BOB stores nothing.</div>
+  <h1>Download Instagram<br>Video in HD</h1>
+  <p class="sub">Save any public Reel, post or video in its original quality. No account, no watermark, no app needed.</p>
+
+  <div class="tool">
+    <h2>Download Instagram Video</h2>
+    <input id="url" placeholder="Paste Instagram link here…" inputmode="url" enterkeyhint="go" autocomplete="off">
+    <button id="go">Download</button>
+    <div id="status" class="note status"></div>
     <div id="preview" class="preview"></div>
+    <details>
+      <summary>How it works (2 taps, no signup)</summary>
+      <div class="step"><b>1</b><p><a id="bkm" class="bkm" href="javascript:void(0)">⤓ BOB — drag to your bookmarks bar (once)</a></p></div>
+      <div class="step"><b>2</b><p>Tap a public Instagram reel/post in your browser, then tap your <b>⤓ BOB</b> bookmark there → the HD file starts downloading (desktop one tap; mobile use upload below).</p></div>
+      <div class="step"><b>3</b><p>On mobile? Long-press the post → Save → save the post as a file → upload it here — parses on your device, zero upload to any server.</p></div>
+      <p class="note" style="margin-top:10px">Your browser does the work: BOB never fetches Instagram, stores nothing, and never asks for your login.</p>
+    </details>
+    <div style="margin-top:12px">
+      <label class="note" style="display:block;margin-bottom:6px">…or upload a saved Instagram page (.html):</label>
+      <input id="file" type="file" accept=".html,.htm">
+    </div>
   </div>
-  <div class="ads">Advertisement (below the tool only — never above, never disguised as a download button)</div>
-  <div class="note">Public only · We never ask for your Instagram login · Files stream directly from Instagram CDN, nothing stored · Copyright remains with creators.</div>
+
+  <div class="grid">
+    <div class="card"><b>HD · Original quality</b><p>1080p ladder, DASH 1080p HFR where Instagram serves it. Never upscaled — if source is 480p, we say 480p.</p></div>
+    <div class="card"><b>Private by design</b><p>No account, no tracking, no server. Bookmarklet reads only the post you already have open.</p></div>
+    <div class="card"><b>Works for WhatsApp Status</b><p>Download on phone → Share → WhatsApp → Status. One native share sheet, no extra app.</p></div>
+  </div>
+
+  <footer>Public only · We never ask for your Instagram login · Files stream directly from Instagram CDN, nothing stored · Copyright remains with creators.</footer>
 </main>
 <script type="module" src="/main.ts"></script>
 </body>

@@ -1,10 +1,19 @@
 // BOB Pages static main — NO Workers, NO cache, NO extension.
 // Primary: Bookmarklet (user IP, IG origin) · Fallback: Upload saved .html (local parse).
-// Public posts only. No cookies sent anywhere. 429 concept does not apply (no server fetch).
+// Public posts only. No cookies sent anywhere. BOB itself never fetches Instagram.
 
 import { extractXigPolarisMedia, parseMedia } from "../../packages/extractor/src/index.ts";
 
 const status = (t: string) => { const el = document.getElementById("status"); if (el) el.textContent = t; };
+
+// 0) Wire the drag-link from /bookmarklet.js (so "Drag to bookmarks bar" actually installs it)
+fetch("/bookmarklet.js")
+  .then((r) => r.text())
+  .then((code) => {
+    const a = document.getElementById("bkm") as HTMLAnchorElement | null;
+    if (a) a.href = "javascript:" + encodeURIComponent(code.trim());
+  })
+  .catch(() => { /* bookmarklet.js missing — link stays inert, upload lane still works */ });
 
 // 1) Bookmarklet handoff: ?m=<base64> (or #m=) carries {shortcode, video_url, thumb, owner}
 {
@@ -24,7 +33,7 @@ const status = (t: string) => { const el = document.getElementById("status"); if
   const m = /https?:\/\/[^\s]*instagram\.com\/[^\s]*/.exec(shared);
   if (m) {
     (document.getElementById("url") as HTMLInputElement | null)!.value = m[0];
-    status("Shared link received — now open that post in your browser and run the BOB bookmarklet (1 tap), or upload the saved page below.");
+    status("Shared link received — open that post and tap ⤓ BOB (1 tap), or upload the saved page below.");
   }
 }
 
@@ -78,14 +87,13 @@ export async function shareOrDownload(cdnUrl: string, filename: string) {
   return "anchored";
 }
 
-// Paste-link is a convenience deep-link ONLY — it cannot fetch IG from BOB origin (CORS).
-// Guide the user to the two honest lanes instead of pretending.
+// Clone pattern: ONE box, ONE button. Paste → IG opens → tap BOB there (1 tap = download).
 document.getElementById("go")?.addEventListener("click", () => {
   const url = (document.getElementById("url") as HTMLInputElement)?.value?.trim() || "";
   if (!/instagram\.com\/(p|reel|reels|tv)\//.test(url)) {
     status("That doesn't look like a public Instagram post/reel link.");
     return;
   }
-  status("Open that link in your browser, then tap the BOB bookmarklet on the post (1 tap). Or save page → upload below. (BOB never fetches Instagram for you — your browser does.)");
+  status("Tap ⤓ BOB on the Instagram tab (1 tap) — HD download starts there.");
   window.open(url, "_blank");
 });
