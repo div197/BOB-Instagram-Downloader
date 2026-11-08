@@ -26,9 +26,13 @@
 <main>
   <h1>BOB — Instagram Downloader</h1>
   <p class="sub">Public reels &amp; posts in HD. No login. No tracking. One tool, one button — no ads above the fold.</p>
-  <div class="tool"><p style="margin:0 0 8px;font-weight:600">Paste a public Instagram link</p>
+  <div class="tool"><p style="margin:0 0 8px;font-weight:600">1) Drag this to your bookmarks bar:</p>
+    <p style="margin:0 0 8px"><a id="bkm" href="javascript:void(0)" style="display:inline-block;padding:10px 14px;border-radius:999px;background:#fff;color:#000;font-weight:700;text-decoration:none">⤓ BOB Downloader</a></p>
+    <p class="note" style="margin:0 0 12px">Then open any public Instagram reel/post → tap the bookmark → HD download starts (your browser, your IP — BOB makes zero requests).</p><p style="margin:0 0 8px;font-weight:600">2) Or save the page &amp; upload it (no install, works on mobile):</p>
+    <input id="file" type="file" accept=".html,.htm">
+    <p style="margin:14px 0 8px;font-weight:600">3) Paste a link (opens it for you — BOB does not fetch Instagram):</p>
     <input id="url" placeholder="https://www.instagram.com/reel/…" inputmode="url" enterkeyhint="go" autocomplete="off">
-    <button id="go" style="min-height:52px;font-size:17px">Get HD download</button>
+    <button id="go" style="min-height:52px;font-size:17px">Open post → then tap BOB</button>
     <div id="status" class="note">Install the BOB browser extension for one-click downloads — it uses your own browser IP, so we never burn ours.</div>
     <div id="preview" class="preview"></div>
   </div>
