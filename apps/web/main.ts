@@ -3,7 +3,40 @@
 
 const status = (t: string) => { const el = document.getElementById("status"); if (el) el.textContent = t; };
 
-// 1) Detect extension via custom ping (extension content-script on bob.example.com listens)
+// Web Share Target: prefill from PWA share (Android intent → BOB).
+{
+  const q = new URLSearchParams(location.search);
+  const shared = q.get("url") || q.get("text") || "";
+  const m = /https?:\/\/[^\s]*instagram\.com\/[^\s]*/.exec(shared);
+  if (m) {
+    const el = document.getElementById("url") as HTMLInputElement | null;
+    if (el) el.value = m[0];
+    if (m[0]) document.getElementById("go")?.dispatchEvent(new Event("click"));
+  }
+}
+
+// Download helper (mobile-first): try Web Share API files first, fallback <a download>.
+export async function shareOrDownload(cdnUrl: string, filename: string) {
+  // Fetch bytes (CDN is CORS-open for <a>, but fetch needs CORS — use blob via <a> when share fails)
+  try {
+    if ("canShare" in navigator && navigator.canShare({ files: [new File([], "x")] })) {
+      const resp = await fetch(cdnUrl);
+      const blob = await resp.blob();
+      const file = new File([blob], filename, { type: blob.type || "video/mp4" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "BOB Reel" });
+        return "shared";
+      }
+    }
+  } catch { /* fallback to anchor below */ }
+  const a = document.createElement("a");
+  a.href = cdnUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  return "anchored";
+}
 let connected = false;
 window.addEventListener("message", (e) => {
   if (e.data?.source === "bob-ext" && e.data?.type === "pong") {

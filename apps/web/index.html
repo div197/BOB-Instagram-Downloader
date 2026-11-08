@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.webmanifest">
 <title>BOB — Instagram Reel Downloader (Public, No Login)</title>
 <meta name="description" content="BOB downloads public Instagram reels and posts in HD. No login. No tracking. Gentleman UX — one tool, one button, no ads above the fold.">
 <meta property="og:title" content="BOB — Instagram Downloader">
@@ -23,9 +26,9 @@
 <main>
   <h1>BOB — Instagram Downloader</h1>
   <p class="sub">Public reels &amp; posts in HD. No login. No tracking. One tool, one button — no ads above the fold.</p>
-  <div class="tool">
-    <input id="url" placeholder="Paste a public Instagram reel / post link…" inputmode="url" autocomplete="off">
-    <button id="go">Get HD download</button>
+  <div class="tool"><p style="margin:0 0 8px;font-weight:600">Paste a public Instagram link</p>
+    <input id="url" placeholder="https://www.instagram.com/reel/…" inputmode="url" enterkeyhint="go" autocomplete="off">
+    <button id="go" style="min-height:52px;font-size:17px">Get HD download</button>
     <div id="status" class="note">Install the BOB browser extension for one-click downloads — it uses your own browser IP, so we never burn ours.</div>
     <div id="preview" class="preview"></div>
   </div>
