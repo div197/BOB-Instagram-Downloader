@@ -2,8 +2,6 @@
 // Primary: Bookmarklet (user IP, IG origin). BOB itself never fetches Instagram.
 // Public posts only. No cookies sent anywhere.
 
-import { extractXigPolarisMedia, parseMedia } from "../../packages/extractor/src/index.ts";
-
 const status = (t: string) => { const el = document.getElementById("status"); if (el) el.textContent = t; };
 
 // 0) Wire the drag-link from /bookmarklet.js (so "Drag to bookmarks bar" actually installs it)
@@ -13,7 +11,7 @@ fetch("/bookmarklet.js")
     const a = document.getElementById("bkm") as HTMLAnchorElement | null;
     if (a) a.href = "javascript:" + encodeURIComponent(code.trim());
   })
-  .catch(() => { /* bookmarklet.js missing — upload is gone by design, bookmarklet link stays inert */ });
+  .catch(() => { /* bookmarklet.js missing — link stays inert */ });
 
 // 1) Bookmarklet handoff: ?m=<base64> (or #m=) carries {shortcode, video_url, thumb, owner}
 {
@@ -36,8 +34,6 @@ fetch("/bookmarklet.js")
     status("Shared link received — open that post and tap ⤓ BOB (1 tap).");
   }
 }
-
-// 2) removed upload lane (owner constraint — no buffered HTML upload; the user-IP bookmarklet is the only extractor)
 
 function renderPreview(data: any) {
   const box = document.getElementById("preview");
