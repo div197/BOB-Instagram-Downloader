@@ -2,33 +2,49 @@
 
 **BOB = Break Ordinary Boundaries**
 
-A deep, ultra-scalable, edge-first system to download **public** Instagram posts, reels, IGTV, and carousels — with a modern hybrid architecture (Cloudflare Pages + Workers + Go extractor) and freemium-first monetization.
+A deep, ultra-scalable, edge-first system to download **public** Instagram posts, reels, IGTV, and carousels — **Cloudflare-pure (Pages + Worker)**, **no cache**, **no extension**, **no wrangler locally**.
 
-> Ultra-deep research (extraction, edge/scale architecture, competitors, AdSense policy, SEO, business model) lives in **[docs/DEEP-RESEARCH.md](docs/DEEP-RESEARCH.md)**. Read §1 Executive Verdict before writing any code.
->
-> The extractor kernel — upside-down tree, roots first (Gita 15.1) — is specified in **[docs/EXTRACTOR-METHODOLOGY.md](docs/EXTRACTOR-METHODOLOGY.md)**: L0 oEmbed preview → L1 inline JSON → L2 GraphQL → L3 yt-dlp/Reelkeep engine → L4 managed fallback → L5 browser last-resort, code-reviewed against the latest GitHub repos (Nov 2026).
+> Deep reverse engineering of `xig_polaris_media` (strict + deep-walk parser, photo/carousel/reel shapes, 13/13 tests) lives in **[docs/REVERSE-ENGINEERING-DEEP.md](docs/REVERSE-ENGINEERING-DEEP.md)**. Read §1–§3 before changing the parser.
+
+## Architecture (final)
+
+```text
+apps/web (Vite → Cloudflare Pages, static ∞ free)
+  → GET /api/extract?url=…  (same-origin Worker)
+  → edge/orchestrator.ts  (Cloudflare Worker, TS)
+      fetch instagram.com/p/{shortcode}/ (Worker native fetch)
+      extractXigPolarisMedia → parseMedia (@bob/extractor)
+      → { media[0].video_url / thumbnail }  → browser download / Web Share API
+```
+
+- **Parser core:** `packages/extractor` (TS, zero deps) — strict `data-sjs` walk **+ recursive signature fallback** (survives Relay module rotation).
+- **Dev harness:** `services/extractor` (Python, `curl_cffi`) — same shape, proves parser on live HTML. Not deployed.
+- **Public-only.** Stories rejected (login-gated upstream). Private/long-ID → `PRIVATE`. 429 → `Retry-After` honored. No cookies, no login, no private bypass.
+
+## Quick start (local, no wrangler)
+
+```bash
+# 1) Python harness tests
+.venv/bin/python -m pytest tests/ -q            # 8 passed
+# 2) TS parser tests
+./node_modules/.bin/tsc -p packages/extractor/tsconfig.json
+node --test packages/extractor/test/*.test.mjs  # 5 passed
+# 3) Web build (Pages preview)
+cd apps/web && ../../node_modules/.bin/vite build && ../../node_modules/.bin/vite preview
+```
+
+Deploy later (when ready) via Cloudflare dashboard Pages → upload `apps/web/dist`, and a Worker from `edge/orchestrator.ts`. **This repo is pushed to GitHub before deploy — no `.dev.vars`, no wrangler state in git.**
+
+## Push to Div197 (when ready)
+
+```bash
+git remote add origin https://github.com/Div197/BOB-Instagram-Downloader.git
+git push -u origin main
+```
 
 ## Principles
 
-- Public-only. No private accounts, no login walls, no credential harvesting — never ask for an Instagram login.
-- No media hosting. On-demand fetch from Instagram CDN, short retention (R2 24h lifecycle), DMCA takedown honoured.
-- Cache by `shortcode` (stable ID), not by expiring media URLs (video URLs expire in ~34h).
-- Freemium-first revenue (Premium no-ads/bulk/API). Google AdSense is **high risk** for a pure downloader (Publisher Policies ban "download streaming videos if prohibited by the content provider") — treated as optional, never load-bearing.
-
-## Status
-
-- [x] Local git initialised (`main`)
-- [x] Ultra-deep research complete — `docs/DEEP-RESEARCH.md`
-- [x] Upside-down extractor methodology + GitHub audit — `docs/EXTRACTOR-METHODOLOGY.md`
-- [x] **Phase-0 extractor kernel built & live-proven** — `services/extractor/` (L0→L3) + 8 offline tests
-- [x] **Live proof on owner's reel `DfcUpmgsQZ6`** — `docs/LIVE-PROOF.md` (L1, 0.9s, 1 fetch, 720p + 1080p DASH, 8.41 MiB verified)
-- [ ] Worker control plane (KV/D1/Queues/R2, HMAC-signed edge delivery)
-- [ ] Gentleman frontend (Vite + SEO pages, 1 ad unit below fold)
-- [ ] Extractor host pick: Hetzner CX22 (recommended) vs Fly.io vs Containers
-
-## Planned stack
-
-- Frontend: Vite + React, pre-rendered SEO HTML → Cloudflare Pages
-- API: Cloudflare Worker (TypeScript) + KV + D1 + Queues + R2
-- Extractor: Go + embedded yt-dlp + ffmpeg → Hetzner / Fly / Containers
-- SEO: 8–12 tool pages (`/instagram-reels-downloader/`, etc.), EN → ES/PT-BR/ID/HI
+- Public-only. Never ask for an Instagram login.
+- Lossless delivery (progressive 720p + DASH ladder; no re-encode).
+- No cache stored, no video bytes hosted by BOB — CDN links pass through.
+- Freemium-first if monetized (AdSense is high-risk for downloaders — Publisher Policies).

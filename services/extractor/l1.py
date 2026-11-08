@@ -18,29 +18,60 @@ from typing import Any
 _DATA_SJS_RE = re.compile(r'<script[^>]*data-sjs[^>]*>(.*?)</script>', re.DOTALL)
 
 
+def _walk_xig(node, depth=0):
+    """Recursive signature search — find xig_polaris_media anywhere (Instagram rotates Relay module order often)."""
+    if depth > 40:
+        return None
+    if isinstance(node, dict):
+        if isinstance(node.get("xig_polaris_media"), dict):
+            return node["xig_polaris_media"]
+        for val in node.values():
+            found = _walk_xig(val, depth + 1)
+            if found is not None:
+                return found
+    elif isinstance(node, list):
+        for item in node:
+            found = _walk_xig(item, depth + 1)
+            if found is not None:
+                return found
+    return None
+
+
 def extract_xig_polaris_media(html: str) -> dict | None:
     for script in _DATA_SJS_RE.findall(html or ""):
         if "xig_polaris_media" not in script:
             continue
         try:
             payload = json.loads(script)
-            modules = payload["require"][0][3][0]["__bbox"]["require"]
         except (KeyError, IndexError, TypeError, json.JSONDecodeError):
             continue
-        for module in modules:
-            if not isinstance(module, list) or len(module) <= 3:
-                continue
-            for entry in module[3]:
-                if not isinstance(entry, dict):
+        # 1) strict path (fast, proven) — ScrapFly + yt-dlp HEAD layout
+        media = None
+        try:
+            modules = payload["require"][0][3][0]["__bbox"]["require"]
+            for module in modules:
+                if not isinstance(module, list) or len(module) <= 3:
                     continue
-                media = (
-                    entry.get("__bbox", {})
-                    .get("result", {})
-                    .get("data", {})
-                    .get("xig_polaris_media")
-                )
+                for entry in module[3]:
+                    if not isinstance(entry, dict):
+                        continue
+                    media = (
+                        entry.get("__bbox", {})
+                        .get("result", {})
+                        .get("data", {})
+                        .get("xig_polaris_media")
+                    )
+                    if media:
+                        break
                 if media:
-                    return media
+                    break
+        except (KeyError, IndexError, TypeError):
+            media = None
+        # 2) deep signature walk — survives __bbox/module rotation
+        if media is None:
+            media = _walk_xig(payload)
+        if media:
+            return media
     return None
 
 
@@ -74,7 +105,13 @@ def _best_image_versions(post: dict) -> list[dict]:
 
 def _media_item(m: dict) -> dict:
     """One sidecar/carousel item — dual-schema (ScrapFly + Polaris)."""
-    thumb = m.get("display_url") or m.get("display_uri") or ""
+    thumb = (
+        m.get("display_url")
+        or m.get("display_uri")
+        or m.get("thumbnail_src")
+        or m.get("display_src")
+        or ""
+    )
     vurl = m.get("video_url") or ""
     if not vurl and m.get("video_versions"):
         best = _best_video_versions(m)
@@ -97,7 +134,9 @@ def _media_item(m: dict) -> dict:
 def parse_media(raw: dict) -> dict:
     """Normalize xig_polaris_media (or its if_not_gated_logged_out child) to BOB shape."""
     post = raw.get("if_not_gated_logged_out") or raw
-    caption = _get(post, "caption", "text", default="") or ""
+    caption = _get(post, "caption", "text", default="") or _get(
+        post, "edge_media_to_caption", "edges", 0, "node", "text", default=""
+    ) or ""
 
     # Counts across generations (edge_media_* vs flat vs Polaris like_count)
     likes = (

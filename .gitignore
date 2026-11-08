@@ -6,11 +6,16 @@ out/
 .vercel/
 *.log
 
-# Cloudflare
+# Cloudflare (final spec: Pages + Worker, no wrangler locally)
 .wrangler/
 .dev.vars
+.dev.vars.*
 .pages
 .cached
+*.dev
+dist/
+apps/web/dist/
+packages/extractor/dist/
 
 # Go / Python
 bin/

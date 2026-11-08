@@ -8,7 +8,8 @@ from services.extractor.l1 import extract_xig_polaris_media, parse_media
 from services.extractor.l3 import select_formats
 from services.extractor.normalize import extract_shortcode
 from services.extractor.errors import InvalidURLError
-from tests.fixture import make_sample_html
+from tests.fixture import make_carousel_html, make_photo_html, make_sample_html
+from services.extractor.l1 import extract_xig_polaris_media as py_extract
 
 
 def test_normalize_strips_tracking():
@@ -69,4 +70,20 @@ def test_l3_format_avc_cap_1080():
     chosen, _ = select_formats(info)
     assert chosen["url"] == "https://x/1080.mp4"
 # (No-cache design: cache feature removed per owner constraint — no cache store, no short-circuit test.)
+
+
+def test_photo_media_type():
+    out = parse_media(extract_xig_polaris_media(make_photo_html()))
+    assert out["type"] == "XIGPolarisPhotoMedia"
+    assert out["media"][0]["is_video"] is False
+    assert out["media"][0]["image_versions"][0]["width"] == 1080
+
+
+def test_carousel_mixed_sidecar():
+    out = parse_media(extract_xig_polaris_media(make_carousel_html()))
+    assert out["type"] == "XIGPolarisCarouselMedia"
+    assert len(out["media"]) == 2
+    assert out["media"][0]["is_video"] is False  # photo
+    assert out["media"][1]["is_video"] is True  # video
+    assert out["media"][1]["video_url"] == "https://cdn.example/car2.mp4"
 

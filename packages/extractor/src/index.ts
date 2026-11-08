@@ -22,19 +22,36 @@ export interface BOBMedia {
   type: string;
   product_type: string;
   caption: string;
+  accessibility_caption: string;
   like_count: number;
   comment_count: number;
   taken_at: number;
   duration: number;
   number_of_qualities: number;
   owner: string;
+  width: number | null;
+  height: number | null;
   media: MediaItem[];
   video_dash_manifest: string;
   is_dash_eligible: boolean;
+  seo_canonical_url: string;
   layer: string;
 }
 
 const DATA_SJS_RE = /<script[^>]*data-sjs[^>]*>([\s\S]*?)<\/script>/g;
+
+function walkXig(node: any, depth = 0): Record<string, any> | null {
+  if (depth > 40) return null;
+  if (node && typeof node === "object") {
+    if (!Array.isArray(node) && node["xig_polaris_media"] && typeof node["xig_polaris_media"] === "object") return node["xig_polaris_media"];
+    const values = Array.isArray(node) ? node : Object.values(node);
+    for (const v of values) {
+      const found = walkXig(v, depth + 1);
+      if (found) return found;
+    }
+  }
+  return null;
+}
 
 export function extractXigPolarisMedia(html: string): Record<string, any> | null {
   let m: RegExpExecArray | null;
@@ -43,17 +60,22 @@ export function extractXigPolarisMedia(html: string): Record<string, any> | null
     if (!m[1].includes("xig_polaris_media")) continue;
     try {
       const payload = JSON.parse(m[1]);
+      // 1) strict path (fast) — ScrapFly + yt-dlp HEAD layout
       const modules = payload?.["require"]?.[0]?.[3]?.[0]?.["__bbox"]?.["require"];
-      if (!Array.isArray(modules)) continue;
-      for (const mod of modules) {
-        if (!Array.isArray(mod) || mod.length <= 3) continue;
-        const entries = mod[3];
-        if (!Array.isArray(entries)) continue;
-        for (const entry of entries) {
-          const media = entry?.["__bbox"]?.["result"]?.["data"]?.["xig_polaris_media"];
-          if (media) return media;
+      if (Array.isArray(modules)) {
+        for (const mod of modules) {
+          if (!Array.isArray(mod) || mod.length <= 3) continue;
+          const entries = mod[3];
+          if (!Array.isArray(entries)) continue;
+          for (const entry of entries) {
+            const media = entry?.["__bbox"]?.["result"]?.["data"]?.["xig_polaris_media"];
+            if (media) return media;
+          }
         }
       }
+      // 2) deep signature walk — survives module rotation
+      const deep = walkXig(payload);
+      if (deep) return deep;
     } catch { /* try next script */ }
   }
   return null;
@@ -88,7 +110,9 @@ function mediaItem(m: Record<string, any>): MediaItem {
 }
 export function parseMedia(raw: Record<string, any>): BOBMedia {
   const post: Record<string, any> = raw["if_not_gated_logged_out"] || raw;
-  const caption: string = post["caption"]?.["text"] || "";
+  const caption: string = post["caption"]?.["text"] || post["edge_media_to_caption"]?.edges?.[0]?.node?.text || "";
+  const like_count = (post["like_count"] != null ? post["like_count"] : (post["edge_media_like_request"]?.count ?? post["likes"]?.count ?? 0)) as number;
+  const comment_count = (post["comment_count"] != null ? post["comment_count"] : (post["comments"]?.count ?? 0)) as number;
   let sidecar: any[] = post["carousel_media"] || [];
   if (!sidecar.length && Array.isArray(post["edge_sidecar_to_children"]?.edges))
     sidecar = post["edge_sidecar_to_children"].edges.map((e: any) => e?.node).filter(Boolean);
@@ -105,15 +129,19 @@ export function parseMedia(raw: Record<string, any>): BOBMedia {
     type: post["__typename"] || (sidecar.length ? "carousel" : "post"),
     product_type: post["product_type"] || "",
     caption,
-    like_count: Number(post["like_count"] ?? post["edge_media_like_request"]?.count ?? 0),
-    comment_count: Number(post["comment_count"] ?? post["comments"]?.count ?? 0),
+    accessibility_caption: post["accessibility_caption"] || "",
+    like_count: Number(like_count || 0),
+    comment_count: Number(comment_count || 0),
     taken_at: post["taken_at_timestamp"] || post["taken_at"] || 0,
     duration,
     number_of_qualities: post["number_of_qualities"] || 0,
     owner: post["owner"]?.username || post["user"]?.username || "",
+    width: (post["dimensions"]?.["width"] ?? post["original_width"] ?? null) as number | null,
+    height: (post["dimensions"]?.["height"] ?? post["original_height"] ?? null) as number | null,
     media,
     video_dash_manifest: dash,
     is_dash_eligible: Boolean(post["is_dash_eligible"]),
+    seo_canonical_url: post["seo_canonical_url"] || "",
     layer: "L1",
   };
 }

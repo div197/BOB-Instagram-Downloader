@@ -2,7 +2,7 @@
   "name": "bob-monorepo",
   "version": "0.1.0",
   "private": true,
-  "description": "BOB = Break Ordinary Boundaries — Pages static + MV3 extension (requester-IP), no Workers",
+  "description": "BOB = Break Ordinary Boundaries — Pages + Worker (Cloudflare only, no cache, no extension)",
   "packageManager": "pnpm@10.33.2",
   "engines": {
     "node": ">=20"
