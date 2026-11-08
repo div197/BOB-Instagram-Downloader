@@ -1,6 +1,6 @@
-// BOB Pages static main — NO Workers, NO cache, NO extension.
-// Primary: Bookmarklet (user IP, IG origin) · Fallback: Upload saved .html (local parse).
-// Public posts only. No cookies sent anywhere. BOB itself never fetches Instagram.
+// BOB Pages static main — NO Workers, NO cache, NO extension, NO .html-upload.
+// Primary: Bookmarklet (user IP, IG origin). BOB itself never fetches Instagram.
+// Public posts only. No cookies sent anywhere.
 
 import { extractXigPolarisMedia, parseMedia } from "../../packages/extractor/src/index.ts";
 
@@ -13,7 +13,7 @@ fetch("/bookmarklet.js")
     const a = document.getElementById("bkm") as HTMLAnchorElement | null;
     if (a) a.href = "javascript:" + encodeURIComponent(code.trim());
   })
-  .catch(() => { /* bookmarklet.js missing — link stays inert, upload lane still works */ });
+  .catch(() => { /* bookmarklet.js missing — upload is gone by design, bookmarklet link stays inert */ });
 
 // 1) Bookmarklet handoff: ?m=<base64> (or #m=) carries {shortcode, video_url, thumb, owner}
 {
@@ -33,22 +33,11 @@ fetch("/bookmarklet.js")
   const m = /https?:\/\/[^\s]*instagram\.com\/[^\s]*/.exec(shared);
   if (m) {
     (document.getElementById("url") as HTMLInputElement | null)!.value = m[0];
-    status("Shared link received — open that post and tap ⤓ BOB (1 tap), or upload the saved page below.");
+    status("Shared link received — open that post and tap ⤓ BOB (1 tap).");
   }
 }
 
-// 2) Upload saved IG page (.html) → local FileReader parse → preview. Zero network.
-document.getElementById("file")?.addEventListener("change", async (e) => {
-  const file = (e.target as HTMLInputElement).files?.[0];
-  if (!file) return;
-  status("Reading saved page locally…");
-  const html = await file.text();
-  const raw = extractXigPolarisMedia(html);
-  if (!raw) { status("No public media found in that file (private post or wrong page?)."); return; }
-  const media = parseMedia(raw as any);
-  renderPreview({ shortcode: media.shortcode, video_url: (media.media[0] as any)?.video_url || "", thumb: (media.media[0] as any)?.thumbnail || "", owner: media.owner, duration: media.duration });
-  status("Done — from your saved file (" + (media.owner ? "@" + media.owner : "public post") + ").");
-});
+// 2) removed upload lane (owner constraint — no buffered HTML upload; the user-IP bookmarklet is the only extractor)
 
 function renderPreview(data: any) {
   const box = document.getElementById("preview");

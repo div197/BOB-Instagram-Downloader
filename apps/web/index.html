@@ -26,8 +26,6 @@
   .step{display:flex;gap:12px;text-align:left;margin:10px 0}
   .step b{background:#232a3d;border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:grid;place-items:center;font-size:14px}
   .step p{margin:0;color:#cbd5e1;font-size:15px}
-  details{margin-top:16px;padding:12px 14px;border:1px dashed #2a3350;border-radius:12px;text-align:left;font-size:14px;color:#9fb0c3}
-  summary{cursor:pointer;font-weight:600;color:#cbd5e1}
   .preview{margin-top:16px;text-align:center}
   video{width:100%;border-radius:12px;background:#000}
   .status{text-align:center}
@@ -53,16 +51,12 @@
     <div id="status" class="note status"></div>
     <div id="preview" class="preview"></div>
     <details>
-      <summary>How it works (2 taps, no signup)</summary>
+      <summary>How it works — 2 taps, no signup (your browser does the work)</summary>
       <div class="step"><b>1</b><p><a id="bkm" class="bkm" href="javascript:void(0)">⤓ BOB — drag to your bookmarks bar (once)</a></p></div>
-      <div class="step"><b>2</b><p>Tap a public Instagram reel/post in your browser, then tap your <b>⤓ BOB</b> bookmark there → the HD file starts downloading (desktop one tap; mobile use upload below).</p></div>
+      <div class="step"><b>2</b><p>Paste a public reel/post link above → it opens that post on Instagram → tap <b>⤓ BOB</b> there → HD file starts downloading (desktop one tap).</p></div>
       <div class="step"><b>3</b><p>On mobile? Long-press the post → Save → save the post as a file → upload it here — parses on your device, zero upload to any server.</p></div>
       <p class="note" style="margin-top:10px">Your browser does the work: BOB never fetches Instagram, stores nothing, and never asks for your login.</p>
     </details>
-    <div style="margin-top:12px">
-      <label class="note" style="display:block;margin-bottom:6px">…or upload a saved Instagram page (.html):</label>
-      <input id="file" type="file" accept=".html,.htm">
-    </div>
   </div>
 
   <div class="grid">
