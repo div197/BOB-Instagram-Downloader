@@ -1,3 +1,5 @@
+> **SUPERSEDED — history.** Final state is Cloudflare-pure (no cache, no extension, Edge Worker + Pages only). See docs/REVERSE-ENGINEERING-DEEP.md + docs/CANONICAL.md.
+
 # Pages-Only Architecture — Infinite Free Edge, Zero Workers
 
 **Project:** BOB = Break Ordinary Boundaries  

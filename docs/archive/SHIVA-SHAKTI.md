@@ -1,3 +1,5 @@
+> **SUPERSEDED — history.** Final state is Cloudflare-pure (no cache, no extension, Edge Worker + Pages only). See docs/REVERSE-ENGINEERING-DEEP.md + docs/CANONICAL.md.
+
 # Shiva–Shakti Architecture — No Install, Edge-First, Shiva-Tiny
 
 **Project:** BOB = Break Ordinary Boundaries  

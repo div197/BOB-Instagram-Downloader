@@ -1,3 +1,5 @@
+> **SUPERSEDED — history.** Final state is Cloudflare-pure (no cache, no extension, Edge Worker + Pages only). See docs/REVERSE-ENGINEERING-DEEP.md + docs/CANONICAL.md.
+
 # Ultimate Deep Review — Nishkaam Karma Yoga, Millions Scale, Rust Verdict
 
 **Project:** BOB = Break Ordinary Boundaries  

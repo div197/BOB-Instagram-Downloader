@@ -1,3 +1,5 @@
+> **SUPERSEDED — history.** Final state is Cloudflare-pure (no cache, no extension, Edge Worker + Pages only). See docs/REVERSE-ENGINEERING-DEEP.md + docs/CANONICAL.md.
+
 # ULTRA 2027 Plan — Zero-Cost, Lossless, Requester-IP, Pages-Only
 
 **Project:** BOB = Break Ordinary Boundaries  

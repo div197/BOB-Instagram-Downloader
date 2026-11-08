@@ -1,3 +1,5 @@
+> **SUPERSEDED — history.** Final state is Cloudflare-pure (no cache, no extension, Edge Worker + Pages only). See docs/REVERSE-ENGINEERING-DEEP.md + docs/CANONICAL.md.
+
 # BOB Decentralised Architecture — Requester-IP, Open-Source, No Paywall
 
 **Project:** BOB = Break Ordinary Boundaries  

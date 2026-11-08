@@ -1,3 +1,5 @@
+> **SUPERSEDED — history.** Final state is Cloudflare-pure (no cache, no extension, Edge Worker + Pages only). See docs/REVERSE-ENGINEERING-DEEP.md + docs/CANONICAL.md.
+
 # BOB Mobile Deep-Dive — 90% Mobile, No Extension, WhatsApp Status First
 
 **Question (owner):** Extension mobile par nahi chalta. 90% log mobile se honge — Instagram reel WhatsApp status par dalna chahenge. Kuch alag socho.

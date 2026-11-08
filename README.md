@@ -5,6 +5,7 @@
 A deep, ultra-scalable, edge-first system to download **public** Instagram posts, reels, IGTV, and carousels — **Cloudflare-pure (Pages + Worker)**, **no cache**, **no extension**, **no wrangler locally**.
 
 > Deep reverse engineering of `xig_polaris_media` (strict + deep-walk parser, photo/carousel/reel shapes, 13/13 tests) lives in **[docs/REVERSE-ENGINEERING-DEEP.md](docs/REVERSE-ENGINEERING-DEEP.md)**. Read §1–§3 before changing the parser.
+> Final truth (teeno khushka kaun): **[docs/CANONICAL.md](docs/CANONICAL.md)**.
 
 ## Architecture (final)
 
