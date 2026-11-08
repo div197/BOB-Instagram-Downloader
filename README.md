@@ -44,7 +44,7 @@ That single fact decides the architecture: **code must run on `instagram.com` (b
             ▼                                           ▼
    Lane A: BOOKMARKLET (desktop, primary)      Lane B: SAVE-UPLOAD (mobile, fallback)
    runs on instagram.com origin                runs in BOB browser tab
-   user's IP + logged-in session               FileReader parses saved .html offline
+   user's IP + logged-in session               user bookmarklet reads data-sjs in-page
             │                                           │
         data-sjs already in DOM                same parser, zero network
             └───────────────┬───────────────────┘
@@ -86,7 +86,7 @@ The bookmarklet **reads the page Instagram already served you** — no new IG re
 
 ```text
 1. IG post ⋮ → "Save Page" (or long-press → Save)      → .html lands in Downloads
-2. Open BOB site → "Upload saved Instagram page (.html)"
+2. Tap the ⤓ BOB bookmarklet on that post → HD download starts"
 3. Parser runs locally (FileReader, zero network) → preview → Download HD → Share
 ```
 
@@ -203,7 +203,7 @@ Output directory: dist
 1. Open your Pages URL on desktop Chrome
 2. Drag "⤓ BOB Downloader" to bookmarks bar
 3. Open DfcUpmgsQZ6 reel → tap bookmark → MP4 starts (Downloads folder)
-4. Phone: save a reel page (.html) → BOB → Upload → preview → Download HD → Share to WhatsApp
+4. (removed)
 ```
 
 ## 9. Repo Structure
@@ -211,7 +211,7 @@ Output directory: dist
 ```text
 .
 ├── apps/web/                  ← Cloudflare Pages (Vite)
-│   ├── index.html             ← tool page (bookmarklet drag + upload + paste UX)
+│   ├── index.html             ← single-box tool (bookmarklet handoff + paste→open)
 │   ├── main.ts                ← bookmarklet handoff + upload parser + share API
 │   ├── public/bookmarklet.js  ← readable MIT bookmarklet (the extractor)
 │   └── public/manifest.webmanifest (share_target)
