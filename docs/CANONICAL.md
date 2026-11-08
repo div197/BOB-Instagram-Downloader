@@ -29,7 +29,7 @@ Instagram ka `data-sjs` blob har Relay deploy par modules shuffle kar sakta hai.
 
 ```text
 Cloudflare Pages (static)     → HTML/JS + SEO + AdSense (below tool)
-Cloudflare Worker (edge)      → GET instagram.com/p/{code}/ → data-sjs → BOBMedia JSON
+User browser on instagram.com → bookmarklet reads data-sjs → BOBMedia JSON
   No KV · No D1 · No R2 · No Queues · No Cron      (stateless, per-request)
 R2 (optional, public bucket)  → optional media index only — not used by default
 Go / Hetzner / Cloud Run / Telegram bot / extension   → ARCHIVED (see docs/archive/)

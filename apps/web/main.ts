@@ -2,7 +2,7 @@
 // Primary: Bookmarklet (user IP, IG origin) · Fallback: Upload saved .html (local parse).
 // Public posts only. No cookies sent anywhere. 429 concept does not apply (no server fetch).
 
-import { extractXigPolarisMedia, parseMedia } from "../../../packages/extractor/src/index.ts";
+import { extractXigPolarisMedia, parseMedia } from "../../packages/extractor/src/index.ts";
 
 const status = (t: string) => { const el = document.getElementById("status"); if (el) el.textContent = t; };
 
