@@ -19,10 +19,12 @@ A deep, ultra-scalable, edge-first system to download **public** Instagram posts
 
 - [x] Local git initialised (`main`)
 - [x] Ultra-deep research complete — `docs/DEEP-RESEARCH.md`
-- [ ] Phase 0 MVP scaffold — awaiting owner decisions:
-  1. Extractor host: Hetzner CX22 (recommended) vs Fly.io vs Cloudflare Containers
-  2. Revenue order: freemium-first (recommended) vs AdSense-led
-  3. 1–2 public test URLs for extractor validation
+- [x] Upside-down extractor methodology + GitHub audit — `docs/EXTRACTOR-METHODOLOGY.md`
+- [x] **Phase-0 extractor kernel built & live-proven** — `services/extractor/` (L0→L3) + 8 offline tests
+- [x] **Live proof on owner's reel `DfcUpmgsQZ6`** — `docs/LIVE-PROOF.md` (L1, 0.9s, 1 fetch, 720p + 1080p DASH, 8.41 MiB verified)
+- [ ] Worker control plane (KV/D1/Queues/R2, HMAC-signed edge delivery)
+- [ ] Gentleman frontend (Vite + SEO pages, 1 ad unit below fold)
+- [ ] Extractor host pick: Hetzner CX22 (recommended) vs Fly.io vs Containers
 
 ## Planned stack
 
