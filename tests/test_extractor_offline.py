@@ -4,7 +4,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from services.extractor.cache import ShortcodeCache
 from services.extractor.l1 import extract_xig_polaris_media, parse_media
 from services.extractor.l3 import select_formats
 from services.extractor.normalize import extract_shortcode
@@ -69,21 +68,5 @@ def test_l3_format_avc_cap_1080():
     }
     chosen, _ = select_formats(info)
     assert chosen["url"] == "https://x/1080.mp4"
+# (No-cache design: cache feature removed per owner constraint — no cache store, no short-circuit test.)
 
-
-def test_cache_put_get_and_expiry(tmp_path):
-    c = ShortcodeCache(tmp_path / "t.sqlite3")
-    c.put("ABC123", {"shortcode": "ABC123", "type": "reel", "media": [{"video_url": "https://cdn/x.mp4?oe=FFFFFFFFFF"}]})
-    hit = c.get("ABC123")
-    assert hit is not None and hit["shortcode"] == "ABC123" and hit["_cached"] is True
-    assert c.get("MISSING") is None
-
-
-def test_pipeline_cache_short_circuits_network(tmp_path, monkeypatch):
-    from services.extractor.pipeline import Extractor
-    monkeypatch.setattr(Extractor, "l1_extract", lambda self, sc: (_ for _ in ()).throw(AssertionError("network should not run")))
-    c = ShortcodeCache(tmp_path / "t2.sqlite3")
-    c.put("DfcUpmgsQZ6", {"shortcode": "DfcUpmgsQZ6", "type": "reel", "media": []})
-    ex = Extractor(cache=c)
-    out = ex.extract("https://www.instagram.com/reel/DfcUpmgsQZ6/")
-    assert out["shortcode"] == "DfcUpmgsQZ6" and out["_cached"] is True
